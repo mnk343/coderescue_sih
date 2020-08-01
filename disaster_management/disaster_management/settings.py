@@ -28,9 +28,6 @@ SECRET_KEY = '__1r15f9$0z%&$igi8ws)1vn(rmk6sx7uq5&h9zp+hqq63bs*l'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -146,3 +143,8 @@ STATIC_URL = '/static/'
 #     "db_pass": urllib.parse.quote_plus("user"),
 #     # "db_pass": "user",
 # }
+
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+ALLOWED_HOSTS=['*','ec2-54-145-95-174.compute-1.amazonaws.com']
+
+
