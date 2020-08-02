@@ -46,11 +46,16 @@
 	<div class="wrapper">
 		<nav id="sidebar" class="sidebar">
             <div class="sidebar-content js-simplebar">
-                <!-- <a class="sidebar-brand" href="index.html"> -->
-                    <span class="align-middle">Dashboard</span>
-                <!-- </a> -->
 
-                <ul class="sidebar-nav">
+                <span class="align-middle sidebar-brand">Dashboard</span>
+
+                <ul class="sidebar-nav" style="width:30em">
+
+                    <li class="sidebar-item">
+						<a class="sidebar-link" href="{% url 'main:headquarters_dashboard' %}">
+                        <i class="align-middle" data-feather="codepen"></i> <span class="align-middle">Manage Active Disasters</span>
+                        </a>
+					</li>
 
                     <li class="sidebar-item">
                         <a class="sidebar-link" href="{% url 'main:all_disasters' %}">
@@ -70,6 +75,12 @@
                         </a>
 					</li>
 
+                    <li class="sidebar-item">
+						<a class="sidebar-link" href="{% url 'main:add_safe_house' %}">
+                        <i class="align-middle" data-feather="home"></i> <span class="align-middle">Add Safe House</span>
+                        </a>
+                    </li>
+
                 </ul>
             </div>
         </nav>
@@ -80,76 +91,100 @@
 
 					<div class="row mb-2 mb-xl-3">
 						<div class="col-auto d-none d-sm-block">
-							<h3><strong>Add Disaster</strong></h3>
+							<h3 style="margin-left: 15em"><strong>Add Disaster</strong></h3>
 						</div>
                     </div>
                     <hr>
                     <div class="container" style="margin-left: 10em; display: inline-block;">
-                        <form action="{% url 'main:add_disaster' %}" method="post">
-                            {% csrf_token %}
-                            <div class="form-group col-md-6 mb-3">
-                                <div class="form-inline">
-                                    <label for="disasterName" style="margin-right:6.2em">Disaster Name</label>
-                                    <input type="text" class="form-control" id="inputName" placeholder="Enter disaster name" name="name">
-                                </div>
-                            </div>
-                            <div class="form-group col-md-6 mb-3">
-                                <div class="form-check form-check-inline" >
-                                    <input class="form-check-input" type="radio" name="activeStatus" id="disasterActive" value="1" checked>
-                                    <label class="form-check-label" for="disasterActive">Active</label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="activeStatus" id="disasterInctive" value="0">
-                                    <label class="form-check-label" for="disasterInctive">Inactive</label>
-                                </div>
-                            </div>
-                            <div class="form-group col-md-6 mb-3">
-                                <div class="form-inline">
-                                    <label for="disasterScale" style="margin-right:1em">Disaster on a scale of 1-10</label>
-                                    <input type="text" class="form-control" id="inputScale" placeholder="Enter disaster scale" name="scale">
-                                </div>
-                            </div>
-                            <!-- <div class="form-group col-md-6 mb-3"> -->
-                                <!-- <div class="form-row"> -->
-                                    <div class="col">
-                                        <label for="disasterCoordinates">Disaster Coordinates: </label><br />
-                                        <div class="form-inline">
-                                            <label for="disasterCoordinates" style="margin-right:9em">Latitude </label>
-                                            <input type="text" class="form-control" id="inputLatitude" placeholder="Enter Latitude" name="latitude">
-                                        </div>
-                                        <br/>
-                                        <div class="form-inline">
-                                            <label for="disasterCoordinates" style="margin-right:8.2em">Longitude </label>
-                                            <input type="text" class="form-control" id="inputLongitude" placeholder="Enter Longitude" name="longitude">
-                                        </div>
-                                        <br/>
-                                        <div class="form-inline">
-                                            <label for="disasterCoordinates" style="margin-right:9.6em">Radius </label>
-                                            <input type="text" class="form-control" id="inputRadius" placeholder="Enter Radius" name="radius">
-                                        </div>
-                                    <!-- </div> -->
-                                <!-- </div> -->
-                            </div>
-                            <br />
-                            <div class="col-xs-12">
-                                <div class="col-md-12" >
+                        <div class="card" style="width:34em; margin-left: 4em">
+                            <form action="{% url 'main:add_disaster' %}" method="post" style="padding: 1.5em">
+                                {% csrf_token %}
+                                <div class="form-group row-md-12 mb-3">
                                     <div class="form-inline">
-                                    <p> Locations Affected </p>
-                                    <div class="" id="field">
-                                        <div id="field0">
-                                            <div class="form-group">
-                                                <div class="col-md-5">
-                                                    <select id="location0" name="location" type="text" class="form-control input-md">
-                                                        {% for loc in location_names %}
-                                                            <option value="{{ loc }}">{{ loc }}</option>
-                                                        {% endfor %}
-                                                    </select>
-                                                </div>
+                                        <label for="disasterName" style="margin-right:6.2em;margin-left: 1em;">Disaster Name</label>
+                                        <input type="text" class="form-control" id="inputName" placeholder="Enter disaster name" name="name">
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-6 mb-3">
+                                    <div class="form-check form-check-inline" >
+                                        <input class="form-check-input" type="radio" name="activeStatus" id="disasterActive" value="1" checked>
+                                        <label class="form-check-label" for="disasterActive">Active</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="activeStatus" id="disasterInctive" value="0">
+                                        <label class="form-check-label" for="disasterInctive">Inactive</label>
+                                    </div>
+                                </div>
+                                <div class="form-group row-md-6 mb-3">
+                                    <div class="form-inline">
+                                        <label for="disasterScale" style="margin-right:1em;margin-left: 1em;">Disaster on a scale of 1-10</label>
+                                        <input type="text" class="form-control" id="inputScale" placeholder="Enter disaster scale" name="scale">
+                                    </div>
+                                </div>
+                                <!-- <div class="form-group col-md-6 mb-3"> -->
+                                    <!-- <div class="form-row"> -->
+                                        <div class="col">
+                                            <label for="disasterCoordinates">Disaster Coordinates: </label><br />
+                                            <div class="form-inline">
+                                                <label for="disasterCoordinates" style="margin-right:9em">Latitude </label>
+                                                <input type="text" class="form-control" id="inputLatitude" placeholder="Enter Latitude" name="latitude">
+                                            </div>
+                                            <br/>
+                                            <div class="form-inline">
+                                                <label for="disasterCoordinates" style="margin-right:8.2em">Longitude </label>
+                                                <input type="text" class="form-control" id="inputLongitude" placeholder="Enter Longitude" name="longitude">
+                                            </div>
+                                            <br/>
+                                            <div class="form-inline">
+                                                <label for="disasterCoordinates" style="margin-right:9.6em">Radius </label>
+                                                <input type="text" class="form-control" id="inputRadius" placeholder="Enter Radius" name="radius">
+                                            </div>
+                                        <!-- </div> -->
+                                    <!-- </div> -->
+                                </div>
+                            <br/>
+                            <div class="col-md-20" >
+                                <div class="row-md-15 form-inline">
+                                <p style="padding-left:0px;margin-left:0.6em; margin-right: 6em;" class="col-md-2"> Category </p>
+                                <div class="col-md-4" id="field">
+                                    <div id="disasterCategory">
+                                        <div class="form-group">
+                                            <div class="col-md-8">
+                                                <select id="disasterCategory" name="disasterCategory" type="text" class="form-control input-md">
+                                                        <option value="Earthquake">Earthquake</option>
+                                                        <option value="Flood">Flood</option>
+                                                        <option value="Thunderstorm">Thunderstorm</option>
+                                                        <option value="Tsunami">Tsunami</option>
+                                                        <option value="Volcanic Eruption">Volcanic Eruption</option>
+                                                        <option value="Landslides">Landslides</option>
+                                                        <option value="Cyclone">Cyclone</option>
+                                                        <option value="Miscellaneous>">Miscellaneous</option>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="form-group col-md-6 mb-3">
-                                        <div class="col-md-4">
+                                </div>
+                                <div class="col-md-4"></div>
+                            </div>
+                            </div>
+                            <br />
+                            <div class="col-md-40" >
+                                <div class="row-md-30 form-inline">
+                                <p style="margin-left:0em; margin-right: 1em;margin-top:0em" class="col-md-"> Locations Affected </p>
+                                <div class="" id="field">
+                                    <div id="field0">
+                                        <div class="form-group">
+                                            <div class="row-md-5">
+                                                <select id="location0" name="location" type="text" class="form-control input-md">
+                                                    {% for loc in location_names %}
+                                                        <option value="{{ loc }}">{{ loc }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-9 mb-9">
+                                        <div class="col-md-9">
                                             <button id="add-more" name="add-more" class="btn btn-dark">Add More</button>
                                         </div>
                                     </div>
@@ -158,16 +193,15 @@
                                 </div>
                                     <br><br>
                                 </div>
-                            </div>
-                                <button type="submit" class="btn btn-dark" style="width:100%">Submit</button>
-                        </form>
-
+                                <button type="submit" class="btn btn-elegant" style="width:50%; margin-left: 7em; color: white">Submit</button>
+                            </form>
+                        </div>
+                        </div>
                     </div>
 
 				</div>
 			</main>
 		</div>
-	</div>
 
 	<script src="{% static 'main/js/app.js' %}"></script>
 
@@ -195,7 +229,7 @@
                 '{% for loc in location_names %}<option value="{{ loc }}">{{ loc }}</option>{% endfor %}</select>';
                 '</div></div></div>';
                 var newInput = $(newIn);
-                var removeBtn = '<button id="remove' + (next - 1) + '" class="btn btn-danger remove-me" >Remove</button></div></div><div id="field">';
+                var removeBtn = '<button id="remove' + (next - 1) + '" class="btn btn-dark remove-me" style="margin-left: 0.8em" >Remove</button></div></div><div id="field">';
                 var removeButton = $(removeBtn);
                 $(addto).after(newInput);
                 $(addRemove).after(removeButton);

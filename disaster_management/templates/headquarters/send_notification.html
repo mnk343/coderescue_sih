@@ -70,11 +70,16 @@
 	<div class="wrapper">
 		<nav id="sidebar" class="sidebar">
 			<div class="sidebar-content js-simplebar">
-				<!-- <a class="sidebar-brand" href="index.html"> -->
-                    <span class="align-middle">Dashboard</span>
-                <!-- </a> -->
+                
+                <span class="align-middle sidebar-brand">Dashboard</span>  
 
-				<ul class="sidebar-nav">
+				<ul class="sidebar-nav" style="width:30em">
+
+                    <li class="sidebar-item">
+						<a class="sidebar-link" href="{% url 'main:headquarters_dashboard' %}">
+                        <i class="align-middle" data-feather="codepen"></i> <span class="align-middle">Manage Active Disasters</span>
+                        </a>
+                    </li>
 
 					<li class="sidebar-item">
 						<a class="sidebar-link" href="{% url 'main:all_disasters' %}">
@@ -92,7 +97,14 @@
 						<a class="sidebar-link" href="{% url 'main:send_notification' %}">
                         <i class="align-middle" data-feather="send"></i> <span class="align-middle">Send Notification</span>
                         </a>
-					</li>
+                    </li>
+                    
+                    <li class="sidebar-item">
+						<a class="sidebar-link" href="{% url 'main:add_safe_house' %}">
+                        <i class="align-middle" data-feather="home"></i> <span class="align-middle">Add Safe House</span>
+                        </a>
+                    </li>
+                    
                 </ul>
 
 			</div>

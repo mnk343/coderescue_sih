@@ -29,11 +29,15 @@
 <div class="wrapper">
     <nav id="sidebar" class="sidebar">
         <div class="sidebar-content js-simplebar">
-            <!-- <a class="sidebar-brand" href="index.html"> -->
-                <span class="align-middle">Dashboard</span>
-            <!-- </a> -->
+            <span class="align-middle sidebar-brand">Dashboard</span>  
 
-            <ul class="sidebar-nav">
+            <ul class="sidebar-nav" style="width:30em">
+
+                <li class="sidebar-item active">
+                    <a class="sidebar-link" href="{% url 'main:headquarters_dashboard' %}">
+                    <i class="align-middle" data-feather="codepen"></i> <span class="align-middle">Manage Active Disasters</span>
+                    </a>
+                </li>
 
                 <li class="sidebar-item">
                     <a class="sidebar-link" href="{% url 'main:all_disasters' %}">
@@ -53,17 +57,55 @@
                     </a>
                 </li>
 
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="{% url 'main:add_safe_house' %}">
+                    <i class="align-middle" data-feather="home"></i> <span class="align-middle">Add Safe House</span>
+                    </a>
+                </li>
+
             </ul>
         </div>
     </nav>
     <div class="main">
         <main class="content">
-            <h1 style="background-color:lightgrey; color:black; text-align: center; width:50%; margin-left:5em; margin-top: 4em; padding:1em">Logged in Successfully</h1>
+            <div class="container-fluid p-0">
+
+                <div class="row mb-2 mb-xl-3">
+                    <div class="col-auto d-none d-sm-block">
+                        <h3 style="font-family: sans-serif; color:darkslategrey; margin-left: 12em;"><strong>Manage Active Disasters</strong></h3>
+                    </div>
+                </div>
+                <hr>
+                <div class="card-deck mt-3" style="margin-left: 0rem;"></div>
+                        {% for disaster in active_disasters %}
+                        <div style="display:inline-block;">
+                        <div class="card bg-light mb-3 text-center" style="width: 22rem; margin-right: 0.7em;">
+                        <div class="card-body">
+                            <h4 style="color: grey; font-size: large;" class="card-title"><label for="{{ disaster.id }}"> {{ disaster.name }}</label></h4>
+                            <!-- <input type="checkbox" class = "disasterClass" id="{{ disaster.id }}" name="{{ disaster.id }}"
+                            value="{{ disaster.id }}" {% if disaster.isactive == 1 %} checked {% endif %}></h4> -->
+                            <b style="color: grey;" class="card-text">Locations:</b>
+                            {% for loc in disaster.location %}
+                                {{loc}} |
+                            {% endfor %}
+                            <br/>
+                            <br/>
+                            <!-- <div class="card-footer"> -->
+                                <a href="{% url 'main:update_statistics' disaster.id %}" class="btn btn-dark">Update Statistics</a>
+                            <!-- </div> -->
+                            <br>
+                            <hr>
+                        </div>
+                    </div>
+                </div>
+                        {% endfor%}
+
+                        <!-- <a href="{% url 'main:all_disasters' %}"> See all disasters and change their status </a> -->
+            </div>
+            </div>
         </main>
     </div>
 </div>
-
-
 <script src="{% static 'main/js/app.js' %}"></script>
 
 {% endblock %}

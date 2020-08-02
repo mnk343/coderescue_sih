@@ -101,7 +101,6 @@ def notifications(request, loc_no):
 def headquarters_dashboard(request):
     client = connect()
     success = 0
-    dt_string = datetime.now()
 
     db = client.main.disaster
     print("HELLO")
@@ -110,7 +109,6 @@ def headquarters_dashboard(request):
 
     all_disasters = []
     location_names = []
-    rescue_teams_names = {}
     active_disasters = []
     for data1 in data:
         all_disasters.append({
@@ -222,6 +220,7 @@ def add_disaster(request):
                     'deaths' : 0
                 }
             },
+            'category' : request.POST['disasterCategory'],
             'location' : location,
             'starting_date' : str(datetime.now().date())
         }
@@ -301,3 +300,172 @@ def send_notification(request):
     }
 
     return render(request, 'headquarters/send_notification.html', context)
+
+def update_statistics(request, disaster_id):
+    if request.method == "GET":
+        client = connect()
+        db = client.main.disaster
+        disaster = list(db.find({ "id" : disaster_id }))[0]
+        stats = {}
+        if 'statistics' in disaster:
+            stats = disaster['statistics']
+        total_stats = {
+            'affected' : 0,
+            'deaths' : 0
+        }
+
+        daily_stats = []
+        for key, value in stats.items():
+            if key == 'total':
+                total_stats = stats['total']
+            else:
+                daily_stats.append(value)
+
+        if not daily_stats:
+            daily_stats = [
+                {
+                    'affected' : 0,
+                    'deaths' : 0
+                }
+            ]
+
+        print(daily_stats)
+        context = {
+            "disaster_id" : disaster_id,
+            "disaster_name" : disaster['name'],
+            "location" : disaster['location'],
+            "total_stats" : total_stats,
+            "daily_stats" : daily_stats
+        }
+
+        if request.session.get('isHeadquartersLoggedIn' , None) == 1 :
+            context['isHeadquartersLoggedIn']=1
+
+        return render(request, 'headquarters/update_statistics.html', context)
+    
+    elif request.method == "POST":
+        affected_stats = request.POST.getlist('affected_stats')
+        deaths_stats = request.POST.getlist('deaths_stats')
+
+        total_stats = {
+            'affected' : 0,
+            'deaths' : 0
+        }
+
+        for stat in affected_stats:
+            total_stats['affected'] += int(stat)
+        for stat in deaths_stats:
+            total_stats['deaths'] += int(stat)
+
+        stats = {
+            "total" : total_stats
+        }
+
+        for x in range(len(affected_stats)):
+            day_no = "day_" + str(x)
+            day_stats = {
+                'affected' : int(affected_stats[x]),
+                'deaths' : int(deaths_stats[x])
+            }
+            stats[day_no] = day_stats
+
+        print(stats)
+        client = connect()
+        db = client.main.disaster
+        db.update_one(
+            { "id" : disaster_id },
+            { "$set": { "statistics" : stats } }
+        )
+
+        return HttpResponseRedirect(reverse('main:headquarters_dashboard'))
+
+def get_new_notifications(request, loc_no):
+    if request.is_ajax and request.method == "GET":
+        if 'lastNotification' not in request.session:
+            client = connect()
+            db = client.main.notification
+            data = db.find().sort("date", pymongo.DESCENDING)
+            allnotfs = list(data)
+            notfs = []
+            for notf in allnotfs:
+                if 'location' in notf and locations[loc_no] in notf['location']:
+                    notf['date'] = notf['date'].strftime('%d/%m/%Y %H:%M:%S')
+                    notfs.append(notf)
+            if notfs != []:
+                request.session['lastNotification'] = notfs[0]['date']
+
+        lastNotif = request.session['lastNotification']
+        locName = locations[loc_no]
+        client = connect()
+        db = client.main.notification
+        print("Queried new notifications")
+        data = db.find().sort("date", pymongo.DESCENDING)
+        allnotfs = list(data)
+        # print(allnotfs)
+        # print(lastNotif)
+        newnotfs = []
+        for notf in allnotfs:
+            if 'location' in notf and locName in notf['location']:
+                notf['date'] = notf['date'].strftime('%d/%m/%Y %H:%M:%S')
+                if notf['date'] != lastNotif:
+                    ########### since ObjectId is not json serializable
+                    notf['_id'] = 0
+                    newnotfs.append(notf)
+                else:
+                    break
+        if newnotfs != []:
+            request.session['lastNotification'] = newnotfs[0]['date']
+            newnotfs.reverse()
+        # so that last notification is picked first to add
+        # print(newnotfs)
+        return JsonResponse({"new_notifications": newnotfs}, status=200)
+    else:
+        HttpResponseRedirect(reverse('main:index'))
+
+def add_safe_house(request):   
+    if request.method == "GET":
+        context = {}
+        location_names = []
+        for location in locations :
+            location_names.append(location)
+
+        context['location_names'] = location_names
+
+        if request.session.get('isHeadquartersLoggedIn' , None) == 1 :
+            context['isHeadquartersLoggedIn']=1
+
+        return render(request, 'headquarters/add_safe_house.html',context)
+
+    elif request.method == "POST":
+        print("From received")
+        client = connect()
+        db = client.main.safeHouses
+        data = list(db.find({ "state" : request.POST['location'] }))
+
+        if data == []:
+            stateData = {
+                'state' : request.POST['location'],
+                'safehouse' : [{
+                    'latitude' : request.POST['latitude'],
+                    'longitude' : request.POST['longitude'],
+                    'name' : request.POST['name']
+                }]
+            }
+            print(stateData)
+            db.insert_one(stateData)
+
+        else:
+            stateData = data[0]
+            safehouses = stateData['safehouse']
+            safehouses.append ({
+                'latitude' : request.POST['latitude'],
+                'longitude' : request.POST['longitude'],
+                'name' : request.POST['name']
+            })
+
+            db.update_one (
+                { "state" : request.POST['location'] },
+                { "$set": { "safehouse" : safehouses } }
+            )
+
+        return HttpResponseRedirect(reverse('main:all_disasters'))

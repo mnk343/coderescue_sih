@@ -58,3 +58,61 @@
     </div>
 </div>
 {% endblock %}
+
+
+{% block javascript %}
+<script>
+var flagForBackgroundColor = 1;
+// Global variable to store time-date of last notification displayed
+setInterval(function () {
+        console.log('Called new notifications at : ' + new Date());
+        $.ajax({
+            type: 'GET',
+            url: "{% url 'main:get_new_notifications' notfLocIndex %}",
+            success: function (response) {
+                var newnotfs = response["new_notifications"];
+                console.log(newnotfs);
+                var constantDate = moment( lastNotification , 'DD-MM-YYYY HH:mm:ss').toDate();
+                for (notf in newnotfs) {
+                    var newDate = moment( newnotfs[notf]['date'] , 'DD-MM-YYYY HH:mm:ss').toDate();
+                    console.log(lastNotification);
+                    console.log(newnotfs[notf]['date']);
+                    console.log(newDate);
+                    console.log(constantDate);
+                    var momentDate = moment('2015-01-16 22:15:00', 'YYYY-MM-DD HH:mm:ss');
+                    var jsDate = momentDate.toDate();
+                    console.log("hello");
+                    console.log(jsDate);
+                    var htmlToPrepend = '';
+                    if( newDate > constantDate && flagForBackgroundColor == 1  ){
+                        htmlToPrepend += '<div class="card bg-light mb-3" style="width: 80%;">';
+                        flagForBackgroundColor=0;
+                    }
+                    
+                    else if( newDate > constantDate && flagForBackgroundColor == 0  ){
+                        htmlToPrepend += '<div class="card text-white bg-dark mb-3" style="width: 80%;">';
+                        flagForBackgroundColor=1;
+                    }
+                    htmlToPrepend += '<div class="card-header">Notification for <b>';
+                    if( newnotfs[notf].name ){
+                        htmlToPrepend += newnotfs[notf].name;
+                    }
+                    else{
+                        htmlToPrepend += '{{notfLocationName}}';
+                    }
+                    htmlToPrepend += '</b><span style="float:right;width:70px;"> <img style="width:25px;height:25px;" src="https://freeiconshop.com/wp-content/uploads/edd/notification-flat.png"/> NEW</span></div><div class="card-body"><h5 class="card-title">';
+                    htmlToPrepend+= newnotfs[notf].message+
+                        '</h5><p class="card-text">'+newnotfs[notf].date+'</p></div></div>';
+                    if( newDate > constantDate ) {
+                        $('#notf_list').prepend(htmlToPrepend);
+                        lastNotification = newnotfs[notf]['date'];
+                    }
+                }
+            },
+            error: function (response) {
+                console.log("Error");
+            }
+        })
+    },10000);
+</script>
+{% endblock javascript %}
