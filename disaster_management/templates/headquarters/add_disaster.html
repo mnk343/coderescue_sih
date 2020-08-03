@@ -16,6 +16,9 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript"
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDCC_Mh6NG2vkOoMep7nDaTHy4_1g1CXxU"></script>
+    <script src="https://unpkg.com/location-picker/dist/location-picker.min.js"></script>
 
 {% endblock %}
 
@@ -23,6 +26,13 @@
 <style>
 * {
   .border-radius(0) !important;
+}
+.modal-backdrop {
+  z-index: -1;
+}
+#map {
+      width: 100%;
+      height: 480px;
 }
 
 #field {
@@ -43,6 +53,27 @@
 {% endblock %}
 
 {% block content %}
+
+<div style="" class="modal fade" id="addLocation" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Select location</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <div id="map"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="closeModal" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" id="confirmPosition" class="btn btn-primary">Select Location</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 	<div class="wrapper">
 		<nav id="sidebar" class="sidebar">
             <div class="sidebar-content js-simplebar">
@@ -81,6 +112,12 @@
                         </a>
                     </li>
 
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{% url 'main:add_rescue_team' %}">
+                        <i class="align-middle" data-feather="users"></i> <span class="align-middle">Add Rescue Team</span>
+                        </a>
+                    </li>
+
                 </ul>
             </div>
         </nav>
@@ -91,53 +128,67 @@
 
 					<div class="row mb-2 mb-xl-3">
 						<div class="col-auto d-none d-sm-block">
-							<h3 style="margin-left: 15em"><strong>Add Disaster</strong></h3>
+							<h3 style="margin-left: 16em"><strong>Add Disaster</strong></h3>
 						</div>
                     </div>
                     <hr>
-                    <div class="container" style="margin-left: 10em; display: inline-block;">
-                        <div class="card" style="width:34em; margin-left: 4em">
-                            <form action="{% url 'main:add_disaster' %}" method="post" style="padding: 1.5em">
+                    <div class="container" style="margin-left: 12em; display: inline-block;">
+                        <div class="card" style="width:31em; margin-left: 6em">
+                            <form action="{% url 'main:add_disaster' %}" method="post" style="padding: 1.5em; align-items: center;">
                                 {% csrf_token %}
                                 <div class="form-group row-md-12 mb-3">
                                     <div class="form-inline">
                                         <label for="disasterName" style="margin-right:6.2em;margin-left: 1em;">Disaster Name</label>
-                                        <input type="text" class="form-control" id="inputName" placeholder="Enter disaster name" name="name">
+                                        <input type="text" class="form-control" id="inputName" placeholder="Enter disaster name" name="name" style="width: 13em">
                                     </div>
                                 </div>
-                                <div class="form-group col-md-6 mb-3">
-                                    <div class="form-check form-check-inline" >
-                                        <input class="form-check-input" type="radio" name="activeStatus" id="disasterActive" value="1" checked>
-                                        <label class="form-check-label" for="disasterActive">Active</label>
+                                <div class="form-group col-md-6 mb-3" style="display:flex;">
+
+                                    <div style="display:inline-block; margin-right: 2em;">
+                                      <label for="disasterActive" class="container radioContainer">Active
+                                        <input type="radio" checked id="disasterActive" name="activeStatus" value="1">
+                                        <span class="checkmark"></span>
+                                      </label>
                                     </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="activeStatus" id="disasterInctive" value="0">
-                                        <label class="form-check-label" for="disasterInctive">Inactive</label>
+
+                                    <div style="display:inline-block;">
+                                      <label for="disasterInctive" class="container radioContainer">Inactive
+                                        <input type="radio" id="disasterInctive" name="activeStatus" value="0">
+                                        <span class="checkmark"></span>
+                                      </label>
                                     </div>
-                                </div>
+
+                                  </div>
                                 <div class="form-group row-md-6 mb-3">
                                     <div class="form-inline">
                                         <label for="disasterScale" style="margin-right:1em;margin-left: 1em;">Disaster on a scale of 1-10</label>
-                                        <input type="text" class="form-control" id="inputScale" placeholder="Enter disaster scale" name="scale">
+                                        <input type="text" class="form-control" id="inputScale" placeholder="Enter disaster scale" name="scale" style="width: 13em">
                                     </div>
                                 </div>
                                 <!-- <div class="form-group col-md-6 mb-3"> -->
                                     <!-- <div class="form-row"> -->
                                         <div class="col">
-                                            <label for="disasterCoordinates">Disaster Coordinates: </label><br />
                                             <div class="form-inline">
-                                                <label for="disasterCoordinates" style="margin-right:9em">Latitude </label>
-                                                <input type="text" class="form-control" id="inputLatitude" placeholder="Enter Latitude" name="latitude">
+                                                <label style="display: inline;" for="safeHouseCoordinates">Safehouse Coordinates: </label><br />
+                                                <button style="margin-left:30px;display: inline;" id="launchModalButton" type="button" class="btn btn-dark" data-toggle="modal" data-target="#addLocation">
+                                                    Set location on map
+                                                </button>
+                                            </div>
+                                            <br/>
+
+                                            <div class="form-inline">
+                                                <label for="disasterCoordinates" style="margin-right:9.2em">Latitude </label>
+                                                <input type="text" class="form-control" id="inputLatitude" placeholder="Enter Latitude" name="latitude" style="width: 13em">
                                             </div>
                                             <br/>
                                             <div class="form-inline">
-                                                <label for="disasterCoordinates" style="margin-right:8.2em">Longitude </label>
-                                                <input type="text" class="form-control" id="inputLongitude" placeholder="Enter Longitude" name="longitude">
+                                                <label for="disasterCoordinates" style="margin-right:8.3em">Longitude </label>
+                                                <input type="text" class="form-control" id="inputLongitude" placeholder="Enter Longitude" name="longitude" style="width: 13em">
                                             </div>
                                             <br/>
                                             <div class="form-inline">
-                                                <label for="disasterCoordinates" style="margin-right:9.6em">Radius </label>
-                                                <input type="text" class="form-control" id="inputRadius" placeholder="Enter Radius" name="radius">
+                                                <label for="disasterCoordinates" style="margin-right:9.7em">Radius </label>
+                                                <input type="text" class="form-control" id="inputRadius" placeholder="Enter Radius" name="radius" style="width: 13em">
                                             </div>
                                         <!-- </div> -->
                                     <!-- </div> -->
@@ -145,12 +196,12 @@
                             <br/>
                             <div class="col-md-20" >
                                 <div class="row-md-15 form-inline">
-                                <p style="padding-left:0px;margin-left:0.6em; margin-right: 6em;" class="col-md-2"> Category </p>
-                                <div class="col-md-4" id="field">
+                                <p style="padding-left:0px;margin-left:0.6em; margin-right: 4.2em;" class="col-md-3"> Category </p>
+                                <div class="col" id="field">
                                     <div id="disasterCategory">
                                         <div class="form-group">
                                             <div class="col-md-8">
-                                                <select id="disasterCategory" name="disasterCategory" type="text" class="form-control input-md">
+                                                <select id="disasterCategory" name="disasterCategory" type="text" class="form-control input-md" style="width: 13em">
                                                         <option value="Earthquake">Earthquake</option>
                                                         <option value="Flood">Flood</option>
                                                         <option value="Thunderstorm">Thunderstorm</option>
@@ -164,18 +215,17 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4"></div>
+                                <!-- <div class="col-md-4"></div> -->
                             </div>
                             </div>
-                            <br />
-                            <div class="col-md-40" >
-                                <div class="row-md-30 form-inline">
-                                <p style="margin-left:0em; margin-right: 1em;margin-top:0em" class="col-md-"> Locations Affected </p>
-                                <div class="" id="field">
+                            <div class="col-md-20" >
+                                <div class="row-md-15 form-inline">
+                                <p style="padding-left: 0px;margin-left:0.6em;margin-right: 1.4em" class="col-md-5"> Locations Affected </p>
+                                <div class="col" id="field">
                                     <div id="field0">
                                         <div class="form-group">
-                                            <div class="row-md-5">
-                                                <select id="location0" name="location" type="text" class="form-control input-md">
+                                            <div class="row">
+                                                <select id="location0" name="location" type="text" class="form-control input-md"  style="width: 13em;">
                                                     {% for loc in location_names %}
                                                         <option value="{{ loc }}">{{ loc }}</option>
                                                     {% endfor %}
@@ -183,17 +233,19 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="form-group col-md-9 mb-9">
-                                        <div class="col-md-9">
-                                            <button id="add-more" name="add-more" class="btn btn-dark">Add More</button>
-                                        </div>
-                                    </div>
                                     <div class="col-4"></div>
                                 </div>
                                 </div>
-                                    <br><br>
                                 </div>
-                                <button type="submit" class="btn btn-elegant" style="width:50%; margin-left: 7em; color: white">Submit</button>
+                                <div class="form-group col-md-20">
+                                    <div class="col-md-15">
+                                        <button id="add-more" name="add-more" class="btn btn-dark">Add More</button>
+                                    </div>
+                                </div>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <button type="submit" class="btn btn-elegant" style="width:60%; margin-left: 5em; color: white">Submit</button>
                             </form>
                         </div>
                         </div>
@@ -224,12 +276,12 @@
                 var addto = "#field" + next;
                 var addRemove = "#field" + (next);
                 next = next + 1;
-                var newIn = ' <div id="field'+ next +'" name="field'+ next +'"><div class="form-group"><div class="col-md-5"> '+
-                '<select id="location'+next+'" name="location" type="text" class="form-control input-md">'+
+                var newIn = ' <div id="field'+ next +'" name="field'+ next +'"><div class="form-group"><div class="row"> '+
+                '<select id="location'+next+'" name="location" type="text" class="form-control input-md" style="width:13em">'+
                 '{% for loc in location_names %}<option value="{{ loc }}">{{ loc }}</option>{% endfor %}</select>';
                 '</div></div></div>';
                 var newInput = $(newIn);
-                var removeBtn = '<button id="remove' + (next - 1) + '" class="btn btn-dark remove-me" style="margin-left: 0.8em" >Remove</button></div></div><div id="field">';
+                var removeBtn = '<button id="remove' + (next - 1) + '" class="btn btn-dark remove-me" style="margin-left: 6.2em" >Remove</button></div></div><div id="field">';
                 var removeButton = $(removeBtn);
                 $(addto).after(newInput);
                 $(addRemove).after(removeButton);
@@ -248,6 +300,43 @@
             }
         });
     });
-</script>
 
+    // Get element references
+    var confirmBtn = document.getElementById('confirmPosition');
+    var onClickPositionView = document.getElementById('onClickPositionView');
+    var onIdlePositionView = document.getElementById('onIdlePositionView');
+  
+    // Initialize locationPicker plugin
+    var lp = new locationPicker('map', {
+      setCurrentPosition: true, // You can omit this, defaults to true
+    }, {
+      zoom: 15 // You can set any google map options here, zoom defaults to 15
+    });
+  
+    // Listen to button onclick event
+    confirmBtn.onclick = function () {
+      // Get current location and show it in HTML
+      var location = lp.getMarkerPosition();
+      document.getElementById('inputLatitude').value = location.lat;
+      document.getElementById('inputLongitude').value = location.lng;
+      let lat = location.lat;
+        let long = location.lng;
+        var querystr = lat + long;
+        $.get('https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='+lat+'&lon='+long , function(data){
+            console.log(data.address);
+            var state = data.address.state;
+            document.getElementById('location0').value = state;
+        });
+      $('#closeModal').click();
+
+    };
+  
+    // Listen to map idle event, listening to idle event more accurate than listening to ondrag event
+    google.maps.event.addListener(lp.map, 'idle', function (event) {
+      // Get current location and show it in HTML
+      var location = lp.getMarkerPosition();
+      onIdlePositionView.innerHTML = 'The chosen location is ' + location.lat + ',' + location.lng;
+    });
+  </script>
+  
 {% endblock javascript %}

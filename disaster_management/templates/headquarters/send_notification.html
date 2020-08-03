@@ -70,8 +70,8 @@
 	<div class="wrapper">
 		<nav id="sidebar" class="sidebar">
 			<div class="sidebar-content js-simplebar">
-                
-                <span class="align-middle sidebar-brand">Dashboard</span>  
+
+                <span class="align-middle sidebar-brand">Dashboard</span>
 
 				<ul class="sidebar-nav" style="width:30em">
 
@@ -98,13 +98,19 @@
                         <i class="align-middle" data-feather="send"></i> <span class="align-middle">Send Notification</span>
                         </a>
                     </li>
-                    
+
                     <li class="sidebar-item">
 						<a class="sidebar-link" href="{% url 'main:add_safe_house' %}">
                         <i class="align-middle" data-feather="home"></i> <span class="align-middle">Add Safe House</span>
                         </a>
                     </li>
-                    
+
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{% url 'main:add_rescue_team' %}">
+                        <i class="align-middle" data-feather="users"></i> <span class="align-middle">Add Rescue Team</span>
+                        </a>
+                    </li>
+
                 </ul>
 
 			</div>
@@ -116,12 +122,12 @@
 
 					<div class="row mb-2 mb-xl-3">
 						<div class="col-auto d-none d-sm-block">
-							<h3 style="margin-left: 14em;"><strong>Send Notification</strong></h3>
+							<h3 style="margin-left: 15em;"><strong>Send Notification</strong></h3>
 						</div>
                     </div>
                     <hr>
                     <div class="container">
-                      <div class="card bg-light" style="width:24em; margin-left: 20em">
+                      <div class="card bg-light" style="width:24em; margin-left: 21em">
                         <form method="POST" action="{% url 'main:send_notification' %}" style="padding:1em">
                             {% csrf_token %}
                           <div style="display:flex;">
@@ -173,7 +179,7 @@
                             <label for="message1">Message To Send</label>
                         </div> -->
 
-                        <input type="submit" value="Send" class="btn btn-mdb-color" style="color: aliceblue; background-color: #343a40!important; width: 100%; margin:0;">
+                        <input type="submit" value="Send" class="btn btn-mdb-color" style="color: aliceblue; background-color: #343a40!important; width: 60%; margin-left:4em;">
                         </form>
                         </div>
                         {% if success %}

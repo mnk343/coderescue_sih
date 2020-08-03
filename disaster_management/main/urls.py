@@ -6,7 +6,6 @@ app_name = 'main'
 urlpatterns = [
     path('', views.index, name='index'),
     path('getlocation', views.getUserLocation, name = 'getUserLocation'),
-    path('<str:latitude>/<str:longitude>', views.index, name = 'find_safe_house'),
     path('get/notifications/<int:loc_no>', views.notifications, name = 'notifications'),
     path('headquarters_dashboard' , views.headquarters_dashboard , name='headquarters_dashboard'),
     path('headquarters/dashboard/add_disaster', views.add_disaster, name = 'add_disaster'),
@@ -16,5 +15,7 @@ urlpatterns = [
     path('headquarters/dashboard/send_notification', views.send_notification, name = 'send_notification'),
     path('headquarters/dashboard/disaster/<str:disaster_id>/update_statistics', views.update_statistics, name='update_statistics'),
     path('get/ajax/notifications/new/<int:loc_no>', views.get_new_notifications, name = 'get_new_notifications'),
-    path('headquarters/dashboard/add_safe_house', views.add_safe_house, name = 'add_safe_house')
+    path('headquarters/dashboard/add_safe_house', views.add_safe_house, name = 'add_safe_house'),
+    path('headquarters/dashboard/add_rescue_team', views.add_rescue_team, name = 'add_rescue_team'),
+    path('<str:latitude>/<str:longitude>/<str:cityUser>', views.index, name = 'find_safe_house'),
 ]

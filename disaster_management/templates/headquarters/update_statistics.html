@@ -95,12 +95,14 @@
             // var addRemove = "#field" + (next);
             next = next + 1;
             var newIn = ' <div id="field'+ next +'" name="field'+ next + '"> \
-                <div class="form-group"> \
-                    <div class="daily_stats"> \
+                <div class="form-group row-md-12 mb-3""> \
+                    <div class="form-inline">\
+                    <div class="daily_stats" style="padding: 1em;"> \
                         Day ' + (next+1) + ' : \
-                        <input id="affected_stats" name="affected_stats" type="text" placeholder="" class="form-control input-md" value="0"> \
+                        <input id="affected_stats" name="affected_stats" type="text" placeholder="" class="form-control input-md" value="0" style="margin-right:2em; margin-left:2em"> \
                         <input id="deaths_stats" name="deaths_stats" type="text" placeholder="" class="form-control input-md" value="0"> \
                     </div> \
+                    </div>\
                 </div> </div>';
             var newInput = $(newIn);
             $(addto).after(newInput);

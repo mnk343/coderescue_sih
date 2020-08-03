@@ -22,7 +22,7 @@ def connect():
     # client = MongoClient('mongodb+srv://user:user@sih-jhvxc.mongodb.net/test?retryWrites=true&w=majority')
     return client
 
-def index(request , latitude='' , longitude=''):
+def index(request , latitude='' , longitude='' , cityUser=''):
     context = {}
     client = connect()
     print(latitude)
@@ -50,8 +50,98 @@ def index(request , latitude='' , longitude=''):
 
     context['data'] = data
 
-    if request.session.get('isHeadquartersLoggedIn' , None) == 1 :
-        context['isHeadquartersLoggedIn']=1
+    if request.session.has_key('locationIndex'):
+        loc_no = int(request.session['locationIndex'])
+        db = client.main.notification
+        print("connected")
+        data = db.find().sort("date", pymongo.DESCENDING)
+        allnotfs = list(data)
+        if 0 <= loc_no < len(locations):
+            notfLocation = locations[loc_no]
+        else:
+            HttpResponseRedirect(reverse('main:index'))
+
+        notfs = []
+        for notf in allnotfs:
+            if 'location' in notf and notfLocation in notf['location']:
+                notf['date'] = notf['date'].strftime('%d/%m/%Y %H:%M:%S')
+                notfs.append(notf)
+
+        if notfs != []:
+            request.session['lastNotification'] = notfs[0]['date']
+        
+        context ['notifications'] = notfs
+        context ['notfLocIndex'] = loc_no
+        context ['notfLocationName'] = locations[loc_no]
+
+        if request.session.get('isHeadquartersLoggedIn' , None) == 1 :
+            context['isHeadquartersLoggedIn']=1
+
+    if latitude != '' and longitude != '' and cityUser != '':
+        dataSafeHouses = list(client.main.safeHouses.find({ 'state': cityUser }))
+        if latitude==1 and request.session.has_key('locationIndex'):
+            print(cityUser)
+            if cityUser == 'undefined':
+                locName = request.session['locationName']
+                dataSafeHouses = list(client.main.safeHouses.find({ 'state': locName }))
+                if len(dataSafeHouses) == 0:
+                    context['nearest_safe_house'] = {
+                        'latitude': "undefined" ,
+                        'longitude': "undefined",
+                    }
+                    context['errorMessage'] = "Sorry, no safe houses found near the selected location."
+                else:
+                    listSafeHousesInUserLocation = dataSafeHouses[0]['safehouse']
+                    context['listSafeHouses'] = listSafeHousesInUserLocation
+                    context['nearest_safe_house'] = {
+                        'latitude': "undefined" ,
+                        'longitude': "undefined",
+                        'flag': 1,
+                    }
+                    context['errorMessage'] = "Your location couldn't be found. Showing all safe houses in the selected state."
+            else:
+                context['nearest_safe_house'] = {
+                    'latitude': "undefined" ,
+                    'longitude': "undefined",
+                }
+                context['errorMessage'] = "Your location couldn't be found. Please select a location from the dropdown to see safehouses."
+        
+
+        elif len(dataSafeHouses) == 0:
+            context['nearest_safe_house'] = {
+                'latitude': "undefined" ,
+                'longitude': "undefined",
+            }
+            context['errorMessage'] = "Sorry, no safe houses found near your location."
+
+        else:
+            listSafeHousesInUserLocation = dataSafeHouses[0]['safehouse']
+            print(listSafeHousesInUserLocation)
+            context['listSafeHouses'] = listSafeHousesInUserLocation
+            URL_BING_API = "https://dev.virtualearth.net/REST/v1/Routes/DistanceMatrix?origins="
+            URL_BING_API += latitude + "," + longitude + "&destinations="
+            for obj in listSafeHousesInUserLocation:
+                URL_BING_API += obj["latitude"] + "," + obj["longitude"] + ";"
+            URL_BING_API = URL_BING_API[:-1]
+
+            URL_BING_API += "&travelMode=driving&key=AvINDoc3SxM9iNoyy6FaioCFuKWu9qowxEk1U1EeY4oEut8puIbYP0W9gjZWeO7F"
+            # print(URL_BING_API)
+            r = requests.get(url = URL_BING_API)
+            r = r.json()
+            min = 100000
+            destinationIndex = -1
+            if len(r['resourceSets']) > 0:
+                for safeHouseDistance in  r['resourceSets'][0]['resources'][0]['results']:
+                    print(safeHouseDistance['travelDistance'])
+                    if float(safeHouseDistance['travelDistance']) < min and float(safeHouseDistance['travelDistance']) >0:
+                        print(safeHouseDistance['travelDistance'])
+                        min = float(safeHouseDistance['travelDistance'])
+                        destinationIndex = safeHouseDistance['destinationIndex']
+                context['nearest_safe_house'] = {
+                    'latitude': listSafeHousesInUserLocation[destinationIndex]['latitude'] ,
+                    'longitude': listSafeHousesInUserLocation[destinationIndex]['longitude']
+                }
+                print(context['nearest_safe_house'])
 
     return render(request , 'main/index.html' , context)
 
@@ -298,6 +388,9 @@ def send_notification(request):
         "success" : success ,
         "active_disasters" : active_disasters
     }
+    if request.session.get('isHeadquartersLoggedIn' , None) == 1 :
+        context['isHeadquartersLoggedIn']=1
+
 
     return render(request, 'headquarters/send_notification.html', context)
 
@@ -469,3 +562,42 @@ def add_safe_house(request):
             )
 
         return HttpResponseRedirect(reverse('main:all_disasters'))
+
+def add_rescue_team(request):
+    if request.method == "GET":
+        client = connect()
+        db = client.main.disaster
+        info = db.find({})
+        data = list(info)
+
+        all_disasters = []
+        for data1 in data:
+            all_disasters.append({
+                "name" : data1["name"],
+                "id" : data1["id"]
+            })
+
+        context = {
+            "all_disasters" : all_disasters
+        }
+
+        if request.session.get('isHeadquartersLoggedIn' , None) == 1 :
+            context['isHeadquartersLoggedIn']=1
+
+        return render(request, 'headquarters/add_rescue_team.html', context)
+
+    elif request.method == "POST":
+        client = connect()
+        db = client.authorization.rescue_team
+
+        if request.POST['rescuePassword'] == request.POST['rescueConfirmPassword']:
+            data = {
+                "username" : request.POST['rescueUsername'],
+                "password" : request.POST['rescuePassword'],
+                "disaster_id" : request.POST['selectedDisaster']
+            }
+            # print(data)
+            db.insert_one(data)
+            return HttpResponseRedirect(reverse('main:headquarters_dashboard'))
+        else:
+            return HttpResponseRedirect(reverse('main:add_rescue_team'))
