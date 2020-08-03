@@ -84,7 +84,7 @@
       <div class="modal-content">
         <div class="modal-header">
           {% if nearest_safe_house.latitude != 'undefined' %}
-          <h5 class="modal-title" id="exampleModalLabel">Nearest Safe House from your location</h5>
+          <h5 class="modal-title" id="exampleModalLabel">Nearest Safe House from your location: {{nearest_safe_house.name}} </h5>
           {% else %}
           <h5 class="modal-title" id="exampleModalLabel">Note</h5>
           {%endif%}
@@ -637,7 +637,7 @@
                 eval( 'var marker_' + {{forloop.counter}} + '= ' +
                 ' L.marker(' +
                 ' [' + {{object.latitude}} +','+ {{object.longitude}} +' ]).addTo(mymap1);');
-                // eval('circle_' + disaster_values.id + '.bindPopup( "<b>'+disaster_values.name+'</b><br><b>Scale:</b>'+ disaster_values.scale+'<br><b>Total Affected: </b>'+disaster_values.statistics.total.affected+ '<br><b>Total Deaths: </b>'+disaster_values.statistics.total.deaths+'<br>" );');
+                eval('marker_' + {{forloop.counter}} + '.bindPopup( "<b>{{object.name}}</b>" );');
         {% endfor %}
 
         

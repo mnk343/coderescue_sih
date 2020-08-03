@@ -79,7 +79,7 @@ def index(request , latitude='' , longitude='' , cityUser=''):
 
     if latitude != '' and longitude != '' and cityUser != '':
         dataSafeHouses = list(client.main.safeHouses.find({ 'state': cityUser }))
-        if latitude==1 and request.session.has_key('locationIndex'):
+        if latitude=='1' and request.session.has_key('locationIndex'):
             print(cityUser)
             if cityUser == 'undefined':
                 locName = request.session['locationName']
@@ -139,7 +139,8 @@ def index(request , latitude='' , longitude='' , cityUser=''):
                         destinationIndex = safeHouseDistance['destinationIndex']
                 context['nearest_safe_house'] = {
                     'latitude': listSafeHousesInUserLocation[destinationIndex]['latitude'] ,
-                    'longitude': listSafeHousesInUserLocation[destinationIndex]['longitude']
+                    'longitude': listSafeHousesInUserLocation[destinationIndex]['longitude'],
+                    'name': listSafeHousesInUserLocation[destinationIndex]['name'],
                 }
                 print(context['nearest_safe_house'])
 
